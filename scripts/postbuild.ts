@@ -15,8 +15,11 @@
 
 import { writeFileSync } from "node:fs";
 
+// `||`, NOT `??`: an unset GitHub Actions variable arrives as an EMPTY STRING, which `??`
+// happily accepts — SITE_URL becomes "", `new URL("")` throws, and the build dies in CI
+// while passing locally. Treat empty as unset, because that is what it means.
 const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://yaseenyk.github.io/al-hala"
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://yaseenyk.github.io/al-hala"
 ).replace(/\/$/, "");
 
 const { hostname } = new URL(SITE_URL);

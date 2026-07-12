@@ -20,8 +20,18 @@
  * The fix is a custom domain — and it is a one-line change: set NEXT_PUBLIC_SITE_URL,
  * drop `basePath`, add a CNAME file. Nothing else in the codebase moves.
  */
+const FALLBACK_ORIGIN = "https://yaseenyk.github.io/al-hala";
+
+/**
+ * `|| `, NOT `?? `.
+ *
+ * An UNSET GitHub Actions variable arrives as an EMPTY STRING, not as undefined — so `??`
+ * accepts it, SITE_URL becomes "", `new URL("")` throws, and the build dies. It passes
+ * locally, where the variable is genuinely absent, and fails only in CI. Treat empty as
+ * unset, because that is what it means.
+ */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://yaseenyk.github.io/al-hala"
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || FALLBACK_ORIGIN
 ).replace(/\/$/, "");
 
 /**
