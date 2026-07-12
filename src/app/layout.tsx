@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Amiri, Cormorant_Garamond, Jost } from "next/font/google";
 
+import { SiteFooter } from "@/components/ui/SiteFooter";
 import { SiteHeader } from "@/components/ui/SiteHeader";
 import { SITE, SITE_URL } from "@/lib/site";
 
@@ -147,6 +148,7 @@ export default function RootLayout({
       <body className="font-sans">
         <SiteHeader />
         {children}
+        <SiteFooter />
       </body>
     </html>
   );
