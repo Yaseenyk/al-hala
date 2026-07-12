@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // node:sqlite is a native built-in. Bundling it would break it — it must be required at
+  // runtime by the Node process, not traced and inlined by the bundler.
+  serverExternalPackages: ["node:sqlite"],
+
   // Brotli/gzip on every HTML and JS response. Off by default behind some hosts.
   compress: true,
   // Removes the `X-Powered-By: Next.js` header. Free byte, and it stops advertising the

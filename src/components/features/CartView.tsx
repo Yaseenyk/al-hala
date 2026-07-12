@@ -123,26 +123,14 @@ export function CartView() {
             </span>
           </div>
 
-          {/*
-            Deliberately disabled, and labelled.
-
-            There is no payment gateway and no commerce backend yet — those decisions are
-            still open (docs/architecture.md). A checkout button that looks live and then
-            fails silently is worse than one that says plainly it is not ready. When the
-            gateway lands, this is the ONE place that changes: the cart already holds a
-            lean, versioned BoxPayload the server can re-price.
-          */}
-          <button
-            type="button"
-            disabled
-            aria-describedby="checkout-note"
-            className="mt-8 w-full rounded-full bg-saffron px-8 py-4 text-xs tracking-widest text-deep-green uppercase disabled:opacity-40"
+                    <Link
+            href="/checkout"
+            className="mt-8 block w-full rounded-full bg-saffron px-8 py-4 text-center text-xs tracking-widest text-deep-green uppercase transition-colors hover:bg-saffron-ring"
           >
             Checkout
-          </button>
-          <p id="checkout-note" className="mt-4 text-xs text-cocoa-ink/40">
-            Online payment is not live yet. Call the shop to order — we will take it from
-            there.
+          </Link>
+          <p className="mt-4 text-xs text-cocoa-ink/40">
+            We confirm every order by phone before payment.
           </p>
         </div>
       </aside>
