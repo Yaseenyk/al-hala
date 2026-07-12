@@ -1,5 +1,5 @@
-import { BOXES } from "@/lib/catalogue";
-import { OCCASIONS } from "@/lib/occasions";
+import { BOXES } from "./catalogue.ts";
+import { OCCASIONS } from "./occasions.ts";
 
 /**
  * Site navigation and social presence. One source of truth for the header, the mobile
@@ -75,6 +75,42 @@ export const SOCIALS: readonly Social[] = [
     d: "M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15V9l5.2 3-5.2 3Z",
   },
 ];
+
+/**
+ * A social href is a PLACEHOLDER until it names an account.
+ *
+ * `https://instagram.com/` is not a link to the shop — it is a link to Instagram. Every one
+ * of these shipped live, on all 49 pages, sending anyone who clicked "Instagram" in the
+ * footer to Instagram's own homepage. A dead link is worse than no link: it spends the
+ * visitor's click and returns nothing.
+ *
+ * The test is the PATH. A real profile carries a handle (`/alhalacandies`, `/919876543210`);
+ * a placeholder has an empty path. Fill the href in and the icon reappears by itself — and
+ * so does the `sameAs` entry below, because both read from the same check.
+ */
+export const isPlaceholderSocial = (href: string): boolean => {
+  try {
+    return new URL(href).pathname.replaceAll("/", "") === "";
+  } catch {
+    return true;
+  }
+};
+
+/** Only the socials that actually point at an account. The header and footer render these. */
+export const ACTIVE_SOCIALS: readonly Social[] = SOCIALS.filter(
+  (social) => !isPlaceholderSocial(social.href),
+);
+
+/**
+ * `sameAs` for the Organization / Store schema.
+ *
+ * This is how Google ties the website, the Instagram account and the Google Business Profile
+ * together into ONE entity — the strongest entity signal available after the Business Profile
+ * itself. It reads from `ACTIVE_SOCIALS`, so a placeholder can never leak into structured
+ * data, and a WRONG `sameAs` (pointing at an account that is not yours) is worse than an
+ * absent one: it merges your shop's identity with a stranger's.
+ */
+export const socialProfiles = (): string[] => ACTIVE_SOCIALS.map((social) => social.href);
 
 /** Icon paths for the action rail. Hand-drawn, stroked, on a 24×24 grid. */
 export const ICONS = {

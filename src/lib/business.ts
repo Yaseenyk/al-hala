@@ -1,3 +1,5 @@
+import { socialProfiles } from "./nav.ts";
+
 /**
  * The physical business. NAP — Name, Address, Phone.
  *
@@ -174,5 +176,9 @@ export function localBusinessSchema(siteUrl: string) {
         : []),
     ],
     hasMap: real(BUSINESS.mapsUrl),
+    // Ties this Store to its social accounts and Google Business Profile as ONE entity.
+    // Empty while the socials are placeholders — and an empty array would itself be a claim,
+    // so it is dropped entirely rather than emitted as `sameAs: []`.
+    sameAs: socialProfiles().length > 0 ? socialProfiles() : undefined,
   };
 }

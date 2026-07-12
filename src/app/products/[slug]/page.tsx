@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/core/JsonLd";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BUSINESS } from "@/lib/business";
-import { SELLABLES, formatMoney, isBox, schemaPrice, sellableBySlug } from "@/lib/catalogue";
+import { SELLABLES, formatMoney, isBox, offerSchema, sellableBySlug } from "@/lib/catalogue";
 import { SITE, SITE_URL, absolute, asset } from "@/lib/site";
 import { isWhatsappConfigured, productEnquiryMessage, waLink } from "@/lib/whatsapp";
 
@@ -80,12 +80,7 @@ export default async function ProductPage({
     // WHO sells it — which is most of the battle for a local business.
     manufacturer: { "@id": `${SITE_URL}/#store` },
     offers: {
-      "@type": "Offer",
-      price: schemaPrice(item.price),
-      priceCurrency: "INR",
-      availability: "https://schema.org/InStock",
-      itemCondition: "https://schema.org/NewCondition",
-      url,
+      ...offerSchema(item, url),
       seller: { "@id": `${SITE_URL}/#store` },
       areaServed: BUSINESS.servesNearby.map((place) => ({ "@type": "City", name: place })),
     },

@@ -4,7 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ICONS, PRIMARY_NAV, SOCIALS, type NavLink } from "@/lib/nav";
+import { ACTIVE_SOCIALS, ICONS, PRIMARY_NAV, type NavLink } from "@/lib/nav";
 import { useCartCount, useWishlistCount } from "@/store/cart";
 
 /**
@@ -103,7 +103,7 @@ export function SiteHeader() {
             Complimentary gift note · Ships nationwide
           </p>
           <ul className="flex items-center gap-4">
-            {SOCIALS.map((social) => (
+            {ACTIVE_SOCIALS.map((social) => (
               <li key={social.label}>
                 <a
                   href={social.href}
@@ -248,14 +248,14 @@ export function SiteHeader() {
 
               <div className="mt-8 flex flex-col gap-4 border-t border-cocoa-ink/10 pt-8">
                 <Link
-                  href="/account/sign-in"
+                  href="/account"
                   onClick={closeAll}
                   className="rounded-full border border-cocoa-ink/20 px-8 py-4 text-center text-xs tracking-widest uppercase"
                 >
                   Sign in
                 </Link>
                 <Link
-                  href="/account/sign-up"
+                  href="/account"
                   onClick={closeAll}
                   className="rounded-full bg-hala-green px-8 py-4 text-center text-xs tracking-widest text-cream uppercase"
                 >
@@ -264,7 +264,7 @@ export function SiteHeader() {
               </div>
 
               <ul className="mt-8 flex items-center justify-center gap-6">
-                {SOCIALS.map((social) => (
+                {ACTIVE_SOCIALS.map((social) => (
                   <li key={social.label}>
                     <a
                       href={social.href}

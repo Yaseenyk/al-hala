@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import { JsonLd } from "@/components/core/JsonLd";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { BOXES, CANDIES, formatMoney, schemaPrice } from "@/lib/catalogue";
+import { BOXES, CANDIES, formatMoney, offerSchema } from "@/lib/catalogue";
 import { SITE, absolute } from "@/lib/site";
 import type { Sellable } from "@/types/box";
 
@@ -55,13 +55,7 @@ const itemList = {
       sku: item.sku,
       url: absolute(`/products/${item.slug}`),
       brand: { "@type": "Brand", name: SITE.name },
-      offers: {
-        "@type": "Offer",
-        price: schemaPrice(item.price),
-        priceCurrency: "INR",
-        availability: "https://schema.org/InStock",
-        url: absolute(`/products/${item.slug}`),
-      },
+      offers: offerSchema(item, absolute(`/products/${item.slug}`)),
     },
   })),
 };

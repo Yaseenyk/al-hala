@@ -185,3 +185,82 @@ export function formatMoney(minorUnits: number): string {
 export function schemaPrice(minorUnits: number): string {
   return (minorUnits / 100).toFixed(2);
 }
+
+/**
+ * `priceValidUntil` — a year from the build.
+ *
+ * Google drops an Offer whose `priceValidUntil` has passed, so a hardcoded date would
+ * silently stop your products showing in Search on the day it expired. Recomputed on every
+ * deploy instead, which means it can only go stale if the site itself goes unbuilt for a
+ * year — and by then the prices are wrong anyway.
+ */
+function priceValidUntil(): string {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() + 1);
+  return date.toISOString().split("T")[0];
+}
+
+/**
+ * The `Offer` for a product, complete enough for merchant rich results.
+ *
+ * `shippingDetails` and `hasMerchantReturnPolicy` are what gate the price/stock/delivery
+ * snippets in Search. Without them Google has the price but not the terms, and shows a
+ * plain blue link where a competitor gets a rich card.
+ *
+ * EVERY VALUE BELOW IS TRUE and traceable: the rates come from `deliveryFor()` in
+ * `pricing.ts`, the lead times and the returns position from the Shipping & Returns page in
+ * `legal.ts`. Structured data that contradicts the policy page it links to is a manual
+ * action waiting to happen — so when one changes, change the other in the same commit.
+ */
+export function offerSchema(item: Sellable, url: string) {
+  return {
+    "@type": "Offer",
+    price: schemaPrice(item.price),
+    priceCurrency: "INR",
+    availability: "https://schema.org/InStock",
+    itemCondition: "https://schema.org/NewCondition",
+    priceValidUntil: priceValidUntil(),
+    url,
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      shippingRate: {
+        "@type": "MonetaryAmount",
+        // ₹60, and free above ₹1500 — `deliveryFor()` in pricing.ts. `maxValue: 0` on a
+        // second rate is how "free over X" is expressed, but the flat rate is the honest
+        // headline and Google reads the simple case more reliably.
+        value: "60.00",
+        currency: "INR",
+      },
+      shippingDestination: {
+        "@type": "DefinedRegion",
+        addressCountry: "IN",
+      },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        // "Everything is pressed to order, so allow two to three working days before it
+        // ships." — legal.ts, Shipping & Returns.
+        handlingTime: {
+          "@type": "QuantitativeValue",
+          minValue: 2,
+          maxValue: 3,
+          unitCode: "DAY",
+        },
+        // Next day within Ratnagiri district; three to six working days elsewhere in India.
+        transitTime: {
+          "@type": "QuantitativeValue",
+          minValue: 1,
+          maxValue: 6,
+          unitCode: "DAY",
+        },
+      },
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "IN",
+      // NOT a hedge — the true policy. "Food made to order cannot be resold, so we do not
+      // accept returns for a change of mind." Claiming a returns window we do not offer
+      // would be a lie that Google checks and customers act on.
+      returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+    },
+  };
+}

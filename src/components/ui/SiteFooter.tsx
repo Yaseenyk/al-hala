@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { BUSINESS, formattedAddress, isPlaceholder } from "@/lib/business";
-import { SOCIALS } from "@/lib/nav";
+import { ACTIVE_SOCIALS } from "@/lib/nav";
 import { OCCASIONS } from "@/lib/occasions";
 import { SITE } from "@/lib/site";
 
@@ -154,7 +154,7 @@ export function SiteFooter() {
                 Follow
               </h2>
               <ul className="mt-6 flex items-center gap-2">
-                {SOCIALS.map((social) => (
+                {ACTIVE_SOCIALS.map((social) => (
                   <li key={social.label}>
                     <a
                       href={social.href}

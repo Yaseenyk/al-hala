@@ -6,6 +6,7 @@ import { StoreSection } from "@/components/features/StoreSection";
 import { BUSINESS, localBusinessSchema } from "@/lib/business";
 import { faqSchema } from "@/lib/faq";
 import { OCCASIONS } from "@/lib/occasions";
+import { socialProfiles } from "@/lib/nav";
 import { SITE, SITE_URL, absolute, asset } from "@/lib/site";
 
 /**
@@ -34,6 +35,9 @@ const organization = {
   // rather than two competing entities with the same name.
   location: { "@id": `${SITE_URL}/#store` },
   areaServed: BUSINESS.servesNearby,
+  // The social accounts, once they name a handle. Dropped entirely while they are
+  // placeholders — see `isPlaceholderSocial` in lib/nav.ts.
+  sameAs: socialProfiles().length > 0 ? socialProfiles() : undefined,
 };
 
 const website = {
