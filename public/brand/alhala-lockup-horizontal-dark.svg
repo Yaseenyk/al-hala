@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 640" width="2000" height="640">
+  <defs></defs>
+  <rect x="130" y="130" width="380" height="380" rx="49.4" fill="#17402E" transform="rotate(45 320 320)"></rect>
+  <rect x="130" y="130" width="380" height="380" rx="49.4" fill="none" stroke="#E9C87E" stroke-width="4.6"></rect>
+  <text x="320" y="371" text-anchor="middle" font-family="Amiri" font-size="160" fill="#FAF7F0">ح</text>
+  <rect x="610" y="190" width="3" height="260" fill="#EAE2D3" opacity="0.5"></rect>
+  <text x="700" y="350" font-family="Marcellus" font-size="170" letter-spacing="22" fill="#FAF7F0">AL-HALA</text>
+  <text x="706" y="440" font-family="Albert Sans" font-weight="600" font-size="44" letter-spacing="20" fill="#EAE2D3">CANDIES · RATNAGIRI</text>
+</svg>

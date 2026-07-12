@@ -1,0 +1,134 @@
+/* `source(none)` + an explicit @source: v4 auto-scans the whole project by default, which
+   swept up CLAUDE.md and docs/*.md — and those files contain the tables of BANNED classes
+   (`pl-4`, `mr-2`, `text-left`). Tailwind read the ban list as usage and compiled every
+   banned utility into the bundle. Scan source only. */
+@import "tailwindcss" source(none);
+@source "../../src";
+
+/* Class-based dark mode. v4 defaults `dark:` to prefers-color-scheme; we drive it
+   from a `.dark` class on <html> so the storefront can expose a toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Fixed brand colours. These NEVER change with the theme — Cream is Cream in light and
+   in dark. WebGL materials read these directly: a gift box rendered in `--surface` would
+   turn from cream to deep green the instant dark mode toggled, and vanish against its
+   own background.
+   --------------------------------------------------------------------------- */
+:root {
+  --brand-cream: #faf7f0;
+  --brand-deep: #0e1f17;
+  --brand-green: #1f5a3d;
+  --brand-saffron: #c98b1f;
+  --brand-saffron-soft: #e9c87e;
+}
+
+/* ---------------------------------------------------------------------------
+   Semantic tokens — the only values that change between light and dark.
+   Components consume these, never the raw brand colours above.
+   --------------------------------------------------------------------------- */
+:root {
+  --surface: #faf7f0;      /* Cream */
+  --surface-deep: #0e1f17; /* Deep Green — tiles, footer, dark bands */
+  --ink: #221b14;          /* Cocoa Ink */
+  --ink-muted: color-mix(in oklab, var(--ink) 70%, transparent);
+  --brand: #1f5a3d;        /* Hala Green */
+  --accent: #c98b1f;       /* Saffron Gold */
+  --accent-soft: #e9c87e;  /* the kit's dark-mode ring — the paler gold */
+  --line: color-mix(in oklab, var(--ink) 12%, transparent);
+}
+
+.dark {
+  --surface: #0e1f17;      /* Deep Green */
+  --surface-deep: #17402e; /* dark-mode tile */
+  --ink: #faf7f0;          /* Cream */
+  --ink-muted: color-mix(in oklab, var(--ink) 70%, transparent);
+  --brand: #1f5a3d;        /* Hala Green holds across both themes */
+  --accent: #e9c87e;       /* dark-mode ring */
+  --accent-soft: #c98b1f;
+  --line: color-mix(in oklab, var(--ink) 16%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Brand colours + typography.
+   Every value traces to `Al-Hala Brand Assets/README.txt`. Nothing is invented.
+   Raw hex is legal here and in the SVG/PNG assets. Nowhere else in the repo.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-hala-green: #1f5a3d;
+  --color-deep-green: #0e1f17;
+  --color-deep-green-tile: #17402e; /* dark-mode tile */
+  --color-saffron: #c98b1f;
+  --color-saffron-ring: #e9c87e;    /* dark-mode ring */
+  --color-cream: #faf7f0;
+  --color-cocoa-ink: #221b14;
+
+  /* These reference variables that next/font sets on <html>. They MUST be on <html> and
+     not <body>: a custom property is substituted where it is DECLARED, so if the font var
+     only exists on <body> then at :root it resolves to nothing, --font-display computes to
+     an invalid value, and every heading silently falls back to the browser default. */
+  --font-sans: var(--font-jost), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-arabic: var(--font-amiri), ui-serif, serif;
+
+  /* -------------------------------------------------------------------------
+     Strict 8pt grid.
+
+     `initial` clears Tailwind's dynamic spacing base, which would otherwise keep
+     generating p-1, p-3, p-7, p-11 … from a 4px multiplier. Without these two
+     lines the discrete steps below MERGE with the dynamic scale instead of
+     replacing it, and the grid is not enforced at all.
+
+     Off-grid classes then emit no CSS — which is silent, not a build failure. So
+     `no-custom-classname` in eslint.config.mjs turns them into a lint error, and
+     `no-arbitrary-value` catches p-[13px], which no theme config can disable.
+     ------------------------------------------------------------------------- */
+  --spacing: initial;
+  --spacing-*: initial;
+
+  --spacing-0: 0px;
+  --spacing-2: 8px;
+  --spacing-4: 16px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+  --spacing-32: 128px;
+
+  /* Sizing steps. Pruning --spacing kills w-/h-/size-/max-w- too, not just padding —
+     without these there is no legal way to size a canvas, a hero, or a product tile,
+     and the only escape would be an arbitrary value, which the linter rejects.
+     Still exact multiples of 8: the grid does not bend, it just reaches further. */
+  --spacing-40: 160px;
+  --spacing-48: 192px;
+  --spacing-64: 256px;
+  --spacing-80: 320px;
+  --spacing-96: 384px;
+  --spacing-128: 512px;
+  --spacing-160: 640px;
+}
+
+/* `inline` is load-bearing: it makes utilities emit `var(--surface)` rather than
+   baking today's value in at build time. Without it, `.dark` silently does nothing. */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-deep: var(--surface-deep);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-brand: var(--brand);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-line: var(--line);
+}
+
+@layer base {
+  body {
+    background-color: var(--surface);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

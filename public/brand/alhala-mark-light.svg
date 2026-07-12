@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs></defs>
+  <rect x="101" y="101" width="310" height="310" rx="40.300000000000004" fill="#0E1F17" transform="rotate(45 256 256)"></rect>
+  <rect x="101" y="101" width="310" height="310" rx="40.300000000000004" fill="none" stroke="#C98B1F" stroke-width="3.7"></rect>
+  <text x="256" y="250" text-anchor="middle" font-family="Amiri" font-size="81" fill="#E9C87E">الحلا</text>
+  <text x="259" y="306" text-anchor="middle" font-family="Marcellus" font-size="45" letter-spacing="6.3" fill="#FAF7F0">AL-HALA</text>
+</svg>
