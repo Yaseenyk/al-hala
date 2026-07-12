@@ -22,23 +22,35 @@ export const BOX_SCHEMA_VERSION = 1;
 /** 1: Choose Box · 2: Select Candies · 3: Personalize · 4: Review */
 export type BuilderStep = 1 | 2 | 3 | 4;
 
-export interface BoxType {
+/**
+ * The URL segment for a product page: /products/<slug>.
+ *
+ * EXPLICIT, never derived from the SKU. A slug is a public, permanent URL and a ranking
+ * asset; a SKU is an internal identifier that warehouse staff rename. Deriving one from the
+ * other means an inventory tidy-up silently 404s a page that Google has indexed.
+ * Slugs are also written for humans and for search — `ratnagiri-alphonso-candy`, not `c-alphonso`.
+ */
+export interface Sellable {
   sku: string;
+  slug: string;
   name: string;
-  /** Total candies this box holds. The single business constraint of the builder. */
-  capacity: number;
+  /**
+   * A real sentence about the product. This is the `description` in Product JSON-LD and the
+   * meta description of its page — so it is the line Google shows and the line an assistant
+   * quotes back. Not a keyword list.
+   */
+  description: string;
   price: Money;
   imageUrl: string;
   imageAlt: string;
 }
 
-export interface CandyItem {
-  sku: string;
-  name: string;
-  price: Money;
-  imageUrl: string;
-  imageAlt: string;
+export interface BoxType extends Sellable {
+  /** Total candies this box holds. The single business constraint of the builder. */
+  capacity: number;
 }
+
+export type CandyItem = Sellable;
 
 /** A candy plus how many of it are in the box. `qty` is always >= 1. */
 export interface CandyLine {

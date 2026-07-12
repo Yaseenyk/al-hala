@@ -21,27 +21,33 @@ import {
 
 const SMALL_BOX: BoxType = {
   sku: "BOX-6",
+  slug: "signature-six",
   name: "Signature Six",
   capacity: 6,
   price: 45000,
+  description: "A six-piece gift box.",
   imageUrl: "/boxes/box-6.jpg",
   imageAlt: "Al-Hala signature six-piece gift box",
 };
 
-const TINY_BOX: BoxType = { ...SMALL_BOX, sku: "BOX-2", capacity: 2 };
+const TINY_BOX: BoxType = { ...SMALL_BOX, sku: "BOX-2", slug: "tiny-two", capacity: 2 };
 
 const SAFFRON: CandyItem = {
   sku: "CANDY-SAFFRON",
+  slug: "saffron-pistachio",
   name: "Saffron Pistachio",
   price: 9000,
+  description: "Saffron and pistachio.",
   imageUrl: "/candies/saffron.jpg",
   imageAlt: "Saffron and pistachio candy",
 };
 
 const ROSE: CandyItem = {
   sku: "CANDY-ROSE",
+  slug: "rose-cardamom",
   name: "Rose Cardamom",
   price: 8500,
+  description: "Rose and cardamom.",
   imageUrl: "/candies/rose.jpg",
   imageAlt: "Rose and cardamom candy",
 };

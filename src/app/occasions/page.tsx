@@ -5,7 +5,7 @@ import { JsonLd } from "@/components/core/JsonLd";
 import { OccasionsGrid } from "@/components/features/OccasionsGrid";
 import { BUSINESS } from "@/lib/business";
 import { OCCASIONS } from "@/lib/occasions";
-import { SITE, SITE_URL, absolute } from "@/lib/site";
+import { SITE, absolute } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Gift Boxes for Every Occasion in Ratnagiri",
@@ -26,7 +26,7 @@ const breadcrumbs = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+    { "@type": "ListItem", position: 1, name: "Home", item: absolute("/") },
     { "@type": "ListItem", position: 2, name: "Occasions", item: absolute("/occasions") },
   ],
 };

@@ -3,6 +3,12 @@ import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
 
 /**
+ * Required by `output: "export"`. Without it the build fails outright rather than shipping
+ * a site with no robots.txt — the correct trade, but it must be declared, not assumed.
+ */
+export const dynamic = "force-static";
+
+/**
  * robots.txt
  *
  * The AI crawlers are listed EXPLICITLY and allowed.

@@ -1,9 +1,13 @@
 import type { MetadataRoute } from "next";
 
+import { SELLABLES } from "@/lib/catalogue";
 import { LEGAL_PAGES } from "@/lib/legal";
 import { OCCASIONS } from "@/lib/occasions";
 import { POSTS } from "@/lib/posts";
 import { absolute } from "@/lib/site";
+
+/** Required by `output: "export"` — the sitemap is written once, at build time. */
+export const dynamic = "force-static";
 
 /**
  * sitemap.xml, generated from the data — never hand-listed.
@@ -27,6 +31,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.9,
     },
+    { url: absolute("/shop"), lastModified: now, changeFrequency: "weekly", priority: 0.9 },
+    // Product pages rank for the highest-intent queries there are — someone typing a candy's
+    // name is further down the funnel than someone typing "gift ideas". Priority reflects it.
+    ...SELLABLES.map((item) => ({
+      url: absolute(`/products/${item.slug}`),
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    })),
     {
       url: absolute("/occasions"),
       lastModified: now,

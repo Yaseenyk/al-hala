@@ -42,3 +42,6 @@ next-env.d.ts
 
 # SQLite database file (server-side orders + enquiries)
 .data/
+
+# Static export output — built by CI, never committed
+out/

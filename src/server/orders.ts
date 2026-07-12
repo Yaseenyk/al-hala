@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 
 import { getDb } from "./db.ts";
-import type { PricedOrder } from "./pricing.ts";
+import type { PricedOrder } from "../lib/pricing.ts";
 import type { CustomerInput } from "./schema.ts";
 import type { BoxPayload } from "../types/box.ts";
 

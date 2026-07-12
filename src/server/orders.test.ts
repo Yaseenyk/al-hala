@@ -4,7 +4,7 @@ import { after, describe, it } from "node:test";
 
 process.env.DATABASE_PATH = ".data/test.db";
 
-const { priceOrder } = await import("./pricing.ts");
+const { priceOrder } = await import("../lib/pricing.ts");
 const { createOrder, findOrder } = await import("./orders.ts");
 
 const payload = {

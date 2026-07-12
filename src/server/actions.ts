@@ -1,10 +1,23 @@
 "use server";
 
 import { createOrder, saveEnquiry } from "./orders.ts";
-import { priceOrder } from "./pricing.ts";
+import { priceOrder } from "../lib/pricing.ts";
 import { enquirySchema, placeOrderSchema } from "./schema.ts";
 
 /**
+ * ⚠️ DORMANT. NOTHING IMPORTS THIS, AND NOTHING MAY, WHILE WE DEPLOY TO GITHUB PAGES.
+ *
+ * The site is a static export (`output: "export"`). Server Actions require a running Node
+ * process; GitHub Pages has none. Import this file from any component and `next build`
+ * fails — which is the correct outcome, but know why before you "fix" it.
+ *
+ * It is kept, unchanged and still tested, because it is the migration path: the day a
+ * payment gateway is wired (Razorpay, for UPI), the site moves to a Node host and THIS is
+ * how orders get taken. Deleting it would mean rewriting a security model that is already
+ * right. Until then, ordering runs through `src/lib/whatsapp.ts`.
+ *
+ * ---
+ *
  * Server Actions. The entry point from the browser into the server.
  *
  * `"use server"` means these are POST endpoints, reachable by anyone with the page open and

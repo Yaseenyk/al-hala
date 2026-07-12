@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/core/JsonLd";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { POSTS, postBySlug } from "@/lib/posts";
-import { SITE, SITE_URL, absolute } from "@/lib/site";
+import { SITE, SITE_URL, absolute, asset } from "@/lib/site";
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -54,14 +54,14 @@ export default async function PostPage({ params }: Params) {
     author: { "@id": `${SITE_URL}/#organization` },
     publisher: { "@id": `${SITE_URL}/#organization` },
     mainEntityOfPage: absolute(`/blog/${post.slug}`),
-    image: absolute(SITE.ogImage),
+    image: asset(SITE.ogImage),
   };
 
   const breadcrumbs = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 1, name: "Home", item: absolute("/") },
       { "@type": "ListItem", position: 2, name: "Journal", item: absolute("/blog") },
       {
         "@type": "ListItem",

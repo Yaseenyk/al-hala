@@ -1,3 +1,4 @@
+import { BOXES } from "@/lib/catalogue";
 import { OCCASIONS } from "@/lib/occasions";
 
 /**
@@ -23,6 +24,14 @@ export const PRIMARY_NAV: readonly NavLink[] = [
         href: `/occasions/${occasion.slug}`,
       })),
       { label: "All occasions", href: "/occasions" },
+    ],
+  },
+  {
+    label: "Shop",
+    href: "/shop",
+    children: [
+      ...BOXES.map((box) => ({ label: box.name, href: `/products/${box.slug}` })),
+      { label: "All candies & boxes", href: "/shop" },
     ],
   },
   { label: "Build a Box", href: "/build-a-box" },

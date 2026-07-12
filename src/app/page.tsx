@@ -6,7 +6,7 @@ import { StoreSection } from "@/components/features/StoreSection";
 import { BUSINESS, localBusinessSchema } from "@/lib/business";
 import { faqSchema } from "@/lib/faq";
 import { OCCASIONS } from "@/lib/occasions";
-import { SITE, SITE_URL, absolute } from "@/lib/site";
+import { SITE, SITE_URL, absolute, asset } from "@/lib/site";
 
 /**
  * Home. A Server Component — only the hero carousel and the header are client islands.
@@ -28,7 +28,7 @@ const organization = {
   "@id": `${SITE_URL}/#organization`,
   name: SITE.name,
   url: SITE_URL,
-  logo: absolute("/brand/alhala-mark-light.svg"),
+  logo: asset("/brand/alhala-mark-light.svg"),
   description: SITE.description,
   // Ties the brand entity to the physical shop, so Google resolves them as one thing
   // rather than two competing entities with the same name.

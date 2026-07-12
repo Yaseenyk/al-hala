@@ -29,6 +29,18 @@ export const BUSINESS = {
   email: "TODO: hello@example.com",
 
   /**
+   * ⚠️ THE ORDER FLOW DEPENDS ON THIS ONE VALUE. Nothing can be bought until it is real.
+   *
+   * There is no server on GitHub Pages, so every order and every enquiry leaves the site as
+   * a WhatsApp message to this number. While it reads `TODO`, the "Order on WhatsApp" button
+   * builds a link to a number that does not exist and the customer lands on an error.
+   *
+   * Format: country code, then the number. DIGITS ONLY — no `+`, no spaces, no dashes.
+   * wa.me rejects anything else. A Ratnagiri mobile is `91` followed by the ten digits.
+   */
+  whatsapp: "TODO91XXXXXXXXXX",
+
+  /**
    * TODO — real coordinates. Take them from your Google Business Profile, not from a
    * rough pin: geo that disagrees with the verified profile is a mismatch signal.
    */

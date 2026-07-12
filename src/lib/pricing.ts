@@ -1,22 +1,28 @@
-import { CATALOGUE } from "../lib/catalogue.ts";
+import { CATALOGUE } from "./catalogue.ts";
 import type { BoxPayload, Money } from "../types/box.ts";
 
 /**
- * AUTHORITATIVE PRICING.
+ * PRICING. Pure — SKUs and quantities in, rupees out. Nothing here ever READS a price from
+ * its input; every figure is looked up from the catalogue and recomputed from scratch.
  *
- * THE RULE: the client sends SKUs and quantities. It never sends a price, and nothing in
- * this file reads one. Every rupee is looked up from the catalogue and recomputed from
- * scratch. The price the customer saw is a preview; this is the number they are charged.
+ * ⚠️ WHERE THE AUTHORITY ACTUALLY LIVES, ON THIS DEPLOYMENT:
  *
- * Deliberately a PURE function with relative imports and no `server-only` guard — not an
- * oversight. It holds no secret and touches no database, so nothing here is dangerous to
- * bundle; and being pure is what makes it unit-testable, which for the one file that
- * decides how much money changes hands is worth far more than an import guard.
+ * The site is a static export on GitHub Pages. There is no server, so this function now runs
+ * in the CUSTOMER'S BROWSER — which they control, and can edit. The total it produces is
+ * therefore NOT a guarantee. Anyone determined enough can make the page display any number.
  *
- * The guard lives where the danger actually is: `db.ts`, `orders.ts` and `actions.ts`.
+ * That is survivable ONLY because of how the order completes: the WhatsApp message carries
+ * the full itemised breakdown — every candy, every quantity, the box — and a HUMAN at the
+ * shop confirms it before a rupee is collected. The shop is the authority. The tampered
+ * total would arrive next to a line-by-line list that contradicts it, in a message a person
+ * reads. That is not a hole; it is a different, older enforcement point.
  *
- * The enforcement is not "this file cannot reach a browser". The enforcement is that
- * `actions.ts` calls THIS to get the number, and never reads one from the request.
+ * The moment payment moves online, that stops being true and this MUST run server-side
+ * again. `src/server/actions.ts` already calls it exactly that way and is kept for it: parse
+ * → re-price HERE → persist what the server computed. Do not wire a gateway to a total that
+ * came from a browser.
+ *
+ * Being pure is what lets it be both — unit-tested, and correct in either home.
  */
 
 export type PriceFailure =

@@ -4,6 +4,50 @@ How the system is put together, why, and where the seams are.
 
 ---
 
+## 0. Deployment reality — READ THIS FIRST
+
+**The site currently ships as a STATIC EXPORT to GitHub Pages.** `output: "export"` in
+`next.config.ts`, served from `https://yaseenyk.github.io/al-hala/`.
+
+GitHub Pages serves files. **There is no Node process**, which means, today:
+
+| Capability | Status |
+| ---------- | ------ |
+| Every page, all SEO, all JSON-LD, sitemap, robots, llms.txt | ✅ Working — all prerendered |
+| Cart, wishlist, box builder | ✅ Working — client-side, localStorage |
+| Ordering | ⚠️ **WhatsApp handoff** (`src/lib/whatsapp.ts`), not a POST |
+| Enquiries | ⚠️ WhatsApp handoff |
+| Server Actions, orders DB, `/order/[ref]` | ❌ Cannot run. `src/server/*` is **dormant** |
+| Payments, Shiprocket | ❌ Not built |
+
+### Why ordering is a WhatsApp handoff
+
+An order cannot be POSTed anywhere, so it leaves as an itemised WhatsApp message that the
+customer sends and a human at the shop confirms. This is how most confectioners and gifting
+shops in India actually sell.
+
+**It also relocates the pricing authority.** `src/lib/pricing.ts` now runs in the customer's
+browser, which they control — so its total is *not* a guarantee. That is safe **only**
+because the WhatsApp message carries the full line-by-line breakdown, and a person reads it
+before taking money. A tampered total arrives contradicting the list printed directly above
+it. `src/lib/whatsapp.test.ts` guards that breakdown; if it ever stops being itemised, the
+check silently dies with it.
+
+**The moment a payment gateway is wired, this stops being true.** Pricing must move back
+server-side. `src/server/actions.ts` is kept, unchanged and still tested, precisely for that:
+parse → re-price on the server → persist what the server computed.
+
+### Migration path off Pages
+
+`src/server/db.ts` (SQLite) needs a persistent filesystem and one writer — a VPS, container,
+Fly or Railway. **On Vercel/Netlify/Lambda it would lose orders silently.** Sections 1–8
+below describe that target architecture. They are the plan, not the present.
+
+Blocking launch: `BUSINESS.whatsapp` in `src/lib/business.ts` is still `TODO` — **nothing
+can be ordered until it is a real number** — along with the rest of the NAP.
+
+---
+
 ## 1. Headless Next.js
 
 The storefront is a **Next.js App Router** application. It owns presentation, routing,
