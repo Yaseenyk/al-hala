@@ -20,7 +20,9 @@ const eslintConfig = defineConfig([
       //   p-[13px] — arbitrary values bypass the theme entirely
       //   p-7      — off-grid classes emit no CSS, silently. This catches them.
       "tailwindcss/no-arbitrary-value": "error",
-      "tailwindcss/no-custom-classname": "error",
+      // `grain` is a real utility declared in globals.css @layer utilities; the plugin
+      // reads the @theme, not the layers, so it cannot see it. Whitelist, do not disable.
+      "tailwindcss/no-custom-classname": ["error", { whitelist: ["grain"] }],
       "tailwindcss/no-contradicting-classname": "error",
       "tailwindcss/enforces-shorthand": "warn",
       "tailwindcss/classnames-order": "warn",

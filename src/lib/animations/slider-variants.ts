@@ -126,6 +126,41 @@ export const floatingElement: Variants = {
   }),
 };
 
+export interface TwinkleCustom {
+  duration?: number;
+  delay?: number;
+  /** Dimmest point of the cycle. Never 0 — a star that vanishes reads as a render bug. */
+  min?: number;
+  max?: number;
+}
+
+/**
+ * Twinkle. Opacity and scale together, because a star that changes brightness without
+ * changing size reads as a flickering div; real specular glints bloom as they brighten.
+ *
+ * Each one takes its own duration and delay so the field never pulses in unison — a
+ * synchronised sky is instantly, obviously fake.
+ */
+export const twinkle: Variants = {
+  still: { opacity: 0.5, scale: 1 },
+  twinkling: ({
+    duration = 4,
+    delay = 0,
+    min = 0.25,
+    max = 1,
+  }: TwinkleCustom = {}) => ({
+    opacity: [min, max, min],
+    scale: [0.85, 1.1, 0.85],
+    transition: {
+      duration,
+      delay,
+      repeat: Infinity,
+      repeatType: "loop" as const,
+      ease: "easeInOut" as const,
+    },
+  }),
+};
+
 /**
  * The jewel's idle breath.
  *

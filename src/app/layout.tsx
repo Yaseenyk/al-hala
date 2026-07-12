@@ -1,5 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Amiri, Cormorant_Garamond, Jost } from "next/font/google";
+
+import { SITE, SITE_URL } from "@/lib/site";
+
 import "./globals.css";
 
 /**
@@ -32,10 +35,84 @@ const amiri = Amiri({
   display: "swap",
 });
 
+/**
+ * `metadataBase` is load-bearing. Without it every relative URL in `openGraph`, `twitter`
+ * and `alternates.canonical` resolves against nothing — Next emits a warning and ships
+ * relative OG image paths, which no social crawler and no LLM fetcher can resolve.
+ */
 export const metadata: Metadata = {
-  title: "Al-Hala Candies | Premium Gifting & Sweets",
-  description:
-    "Curated premium sweets and custom gifting boxes for every occasion.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE.title,
+    // Every child route gets "Page — Al-Hala Candies" without repeating the brand by hand.
+    template: `%s — ${SITE.name}`,
+  },
+  description: SITE.description,
+  applicationName: SITE.name,
+  keywords: [
+    "gift boxes",
+    "handmade candy",
+    "wedding favours",
+    "Eid gifts",
+    "corporate gifting",
+    "build your own gift box",
+  ],
+  authors: [{ name: SITE.name }],
+  creator: SITE.name,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+    title: SITE.title,
+    description: SITE.description,
+    url: "/",
+    locale: "en_US",
+    images: [
+      {
+        url: SITE.ogImage,
+        width: 1200,
+        height: 630,
+        alt: "Al-Hala Candies — premium handmade confectionery in keepsake gift boxes",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE.title,
+    description: SITE.description,
+    images: [SITE.ogImage],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon-180.png",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      // Let Google show a full-size image and an unlimited snippet. Capping the snippet
+      // is what produces those useless truncated SERP descriptions.
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+};
+
+/**
+ * Separate from `metadata` — Next 15+ requires the viewport export, and a missing
+ * `width=device-width` is the single most common cause of a broken mobile layout.
+ */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FAF7F0" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E1F17" },
+  ],
 };
 
 export default function RootLayout({
