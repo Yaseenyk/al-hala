@@ -46,7 +46,16 @@ jobs:
       - name: Build static export
         run: npm run build
 
+      # `enablement: true` makes the action switch Pages to the "GitHub Actions" source via
+      # the API instead of failing when it is still set to "Deploy from a branch".
+      #
+      # That default is why the first deploy failed: GitHub had Pages on branch mode, ran
+      # JEKYLL over the repo root, and published a 1.7 kB stub with the repo name as its
+      # title. Jekyll also ignores every folder beginning with `_`, so even had it seen the
+      # export it would have dropped all of /_next/ — no CSS, no JS. This flag ends both.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - uses: actions/upload-pages-artifact@v3
         with:
