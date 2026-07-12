@@ -107,6 +107,23 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  /**
+   * Ownership verification. Both are optional and both are just a `<meta>` tag.
+   *
+   * Until Search Console is verified you are blind: you cannot see whether Google has
+   * indexed a single page, which queries you surface for, or which of the structured data
+   * above it actually accepted. Shipping SEO work without it is guessing.
+   *
+   * Set `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION` (and optionally the Bing one) in the repo's
+   * Actions variables. Unset, the key is `undefined` and Next omits the tag entirely — an
+   * empty `content=""` would be a broken tag rather than an absent one.
+   */
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+      : {},
+  },
 };
 
 /**

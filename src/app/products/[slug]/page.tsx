@@ -3,9 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/core/JsonLd";
+import { OptimizedImage } from "@/components/core/OptimizedImage";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { BUSINESS } from "@/lib/business";
-import { SELLABLES, formatMoney, isBox, offerSchema, sellableBySlug } from "@/lib/catalogue";
+import {
+  SELLABLES,
+  formatMoney,
+  isBox,
+  offerSchema,
+  productImage,
+  sellableBySlug,
+} from "@/lib/catalogue";
 import { SITE, SITE_URL, absolute, asset } from "@/lib/site";
 import { isWhatsappConfigured, productEnquiryMessage, waLink } from "@/lib/whatsapp";
 
@@ -73,7 +81,8 @@ export default async function ProductPage({
     description: item.description,
     sku: item.sku,
     url,
-    image: asset(SITE.ogImage),
+    // Absent until a real photograph exists — NOT the brand OG card. See productImage().
+    image: productImage(item, asset),
     brand: { "@type": "Brand", name: SITE.name },
     category: box ? "Gift Boxes" : "Confectionery",
     // Ties the product to the shop entity declared on the homepage, so Google understands
@@ -118,6 +127,21 @@ export default async function ProductPage({
               <h2 id="detail" className="sr-only">
                 Details
               </h2>
+
+              {/* Renders the moment a real photograph lands in the catalogue. No image is
+                  shown rather than a stand-in, because a stand-in photo of a candy is a lie
+                  about the product a customer is deciding to buy. */}
+              {item.imageUrl ? (
+                <OptimizedImage
+                  src={item.imageUrl}
+                  alt={item.imageAlt}
+                  width={800}
+                  height={800}
+                  priority
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  className="mb-16 rounded-lg"
+                />
+              ) : null}
 
               <dl className="flex flex-col gap-6">
                 <Row label="Price">

@@ -13,23 +13,39 @@ import type { NextConfig } from "next";
  *   - Orders DB → `src/server/*` is dormant, not deleted. It is the migration path back to
  *                 a Node host (Railway/Fly) the day payment is wired.
  */
+
+/**
+ * ONE source of truth for where this site lives: `NEXT_PUBLIC_SITE_URL`.
+ *
+ * `basePath` is DERIVED from it, exactly as `BASE_PATH` is in `src/lib/site.ts`. Both read
+ * the same env var, so the router and the canonical URLs cannot drift — a site whose links
+ * point at one origin while its sitemap advertises another is a site Google cannot index.
+ *
+ * Today:  https://yaseenyk.github.io/al-hala  → basePath "/al-hala"
+ * Custom: https://alhalacandies.com          → basePath ""        (and a CNAME is written)
+ *
+ * Moving to the custom domain is therefore a ONE-LINE change — set the env var. Nothing in
+ * `src/` moves.
+ */
+const SITE_URL = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://yaseenyk.github.io/al-hala"
+).replace(/\/$/, "");
+
+const basePath = new URL(SITE_URL).pathname.replace(/\/$/, "");
+
 const nextConfig: NextConfig = {
   output: "export",
 
-  /**
-   * The site lives at https://yaseenyk.github.io/al-hala/ — a SUBPATH, not a root.
-   *
-   * Every internal href and asset URL must carry the `/al-hala` prefix or it 404s.
-   * `next/link` and `next/image` apply this automatically; a hand-written `<img src="/x">`
-   * would NOT, which is why nothing in this codebase writes one.
-   */
-  basePath: "/al-hala",
+  // "" on a custom domain, "/al-hala" on the project page. `next/link` and `next/image`
+  // apply it automatically; a hand-written `<img src="/x">` would NOT, which is why nothing
+  // in this codebase writes one.
+  basePath,
 
   images: {
     /**
      * The Next image optimiser is a SERVER. It cannot exist here. Without this flag the
-     * export fails outright rather than silently degrading — which is the correct trade,
-     * but it does mean every image ships at its source resolution. Compress before commit.
+     * export fails outright rather than silently degrading — the correct trade, but it does
+     * mean every image ships at its source resolution. Compress before committing.
      */
     unoptimized: true,
   },

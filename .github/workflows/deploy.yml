@@ -43,8 +43,20 @@ jobs:
       - name: Test
         run: npm test
 
+      # Advisory, never blocking. It reports what is still unfilled — the WhatsApp number,
+      # the NAP, the product photos — every one of which deploys perfectly happily while
+      # doing nothing. Failing the deploy over a missing phone number would be its own kind
+      # of stupid; not TELLING you is worse. Read it in the log before you announce the site.
+      - name: Launch preflight (advisory)
+        run: npm run preflight
+        continue-on-error: true
+
       - name: Build static export
         run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
+          NEXT_PUBLIC_BING_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_BING_SITE_VERIFICATION }}
 
       # `enablement: true` makes the action switch Pages to the "GitHub Actions" source via
       # the API instead of failing when it is still set to "Deploy from a branch".

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test \"src/**/*.test.ts\""
+    "test": "node --test \"src/**/*.test.ts\"",
+    "postbuild": "node scripts/postbuild.ts",
+    "preflight": "node scripts/preflight.ts"
   },
   "dependencies": {
     "motion": "^12.42.2",

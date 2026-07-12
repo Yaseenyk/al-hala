@@ -3,8 +3,8 @@ import Link from "next/link";
 
 import { JsonLd } from "@/components/core/JsonLd";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { BOXES, CANDIES, formatMoney, offerSchema } from "@/lib/catalogue";
-import { SITE, absolute } from "@/lib/site";
+import { BOXES, CANDIES, formatMoney, offerSchema, productImage } from "@/lib/catalogue";
+import { SITE, absolute, asset } from "@/lib/site";
 import type { Sellable } from "@/types/box";
 
 export const metadata: Metadata = {
@@ -53,6 +53,7 @@ const itemList = {
       name: item.name,
       description: item.description,
       sku: item.sku,
+      image: productImage(item, asset),
       url: absolute(`/products/${item.slug}`),
       brand: { "@type": "Brand", name: SITE.name },
       offers: offerSchema(item, absolute(`/products/${item.slug}`)),

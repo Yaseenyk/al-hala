@@ -158,6 +158,25 @@ export function isBox(item: Sellable): item is BoxType {
 }
 
 /**
+ * The image for a product's JSON-LD, or `undefined` if there is no real photograph of it.
+ *
+ * ⚠️ GOOGLE RENDERS NO PRODUCT RICH RESULT WITHOUT A PER-PRODUCT IMAGE. Every `Offer` on this
+ * site — price, stock, shipping, returns — is valid and completely inert until this returns
+ * something.
+ *
+ * It deliberately does NOT fall back to the brand OG card. Handing Google the same generic
+ * image for all eleven products asserts that the Alphonso candy and the 24-piece box look
+ * identical, which is a false claim about every one of them. An ABSENT image is honest and
+ * costs a rich result; a WRONG image is a false claim and costs trust.
+ *
+ * Photos are a drop-in: put the file in `public/products/`, set `imageUrl`, done. No code
+ * changes — that is the whole point of routing it through here.
+ */
+export function productImage(item: Sellable, absoluteUrl: (path: string) => string) {
+  return item.imageUrl ? absoluteUrl(item.imageUrl) : undefined;
+}
+
+/**
  * Money formatting happens HERE and nowhere else — the one render edge.
  *
  * `Intl.NumberFormat` with a fixed locale, not the user's: a price is a fact about the

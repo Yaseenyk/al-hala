@@ -24,6 +24,21 @@ export const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://yaseenyk.github.io/al-hala"
 ).replace(/\/$/, "");
 
+/**
+ * The path the site is served from — DERIVED from SITE_URL, never written down twice.
+ *
+ * On GitHub Pages this is `/al-hala`; on a custom domain it is `""`. `next.config.ts` reads
+ * the same env var through `basePath()` in `site.config.mjs` and computes the same thing, so
+ * the router and the canonical URLs cannot drift apart. Hardcoding `/al-hala` in one place
+ * and the full URL in another is how a site ends up linking to one place and telling Google
+ * about another.
+ *
+ * Moving to a custom domain is therefore ONE change: set NEXT_PUBLIC_SITE_URL. The basePath
+ * empties itself, the canonicals follow, the sitemap follows, and the CNAME is written by
+ * the build.
+ */
+export const BASE_PATH = new URL(SITE_URL).pathname.replace(/\/$/, "");
+
 export const SITE = {
   name: "Al-Hala Candies",
   /**
