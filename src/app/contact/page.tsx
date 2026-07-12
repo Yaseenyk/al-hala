@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { ContactForm } from "@/components/features/ContactForm";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { BUSINESS, formattedAddress } from "@/lib/business";
+import { BUSINESS, formattedAddress, isPlaceholder } from "@/lib/business";
 
 export const metadata: Metadata = {
   title: "Contact & Visit the Shop",
@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
-const isPlaceholder = (value: string) => value.startsWith("TODO");
 
 export default function ContactPage() {
   return (

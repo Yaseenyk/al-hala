@@ -78,6 +78,37 @@ export const BUSINESS = {
   mapsUrl: "TODO: https://maps.google.com/?cid=...",
 } as const;
 
+/**
+ * Is this value still a `TODO` placeholder?
+ *
+ * Lives HERE, beside the data it guards, and is exported. It used to be copy-pasted into
+ * each component that rendered NAP — which is exactly how `localBusinessSchema()` below came
+ * to ship `telephone: "TODO: +91-XXXXXXXXXX"` to Google while the visible footer correctly
+ * hid it. A guard that does not live next to its data gets forgotten by the next consumer.
+ */
+export const isPlaceholder = (value: string) => value.startsWith("TODO");
+
+/**
+ * The value, or `undefined` if it is still a placeholder.
+ *
+ * `JSON.stringify` drops undefined keys, so an unfilled field vanishes from the JSON-LD
+ * entirely. That is the point: a MISSING property is neutral, whereas a property whose value
+ * reads `TODO: shop no., street, landmark` is a positive claim that is false. Google cannot
+ * match it to the Google Business Profile, and it learns that this site's structured data is
+ * not to be trusted — which costs more than the field was ever worth.
+ */
+const real = (value: string) => (isPlaceholder(value) ? undefined : value);
+
+/**
+ * Publish coordinates and opening hours only once a human has checked them against the
+ * Google Business Profile. Both defaults below are plausible guesses, and that is precisely
+ * the danger: a geo pin that disagrees with the verified profile is a mismatch signal, and
+ * wrong opening hours send a real customer to a shop that is shut.
+ *
+ * Flip to `true` in the same change that fills in the real values.
+ */
+export const NAP_VERIFIED = false;
+
 /** A single-line address for display and for NAP consistency. Do not reformat it per page. */
 export function formattedAddress(): string {
   return [
@@ -102,29 +133,37 @@ export function localBusinessSchema(siteUrl: string) {
     url: siteUrl,
     image: `${siteUrl}/alhala-og-card-1200x630.png`,
     logo: `${siteUrl}/brand/alhala-mark-light.svg`,
-    telephone: BUSINESS.telephone,
-    email: BUSINESS.email,
+    // `real()` on every unverifiable field. An unfilled one disappears rather than shipping
+    // the word TODO into Google's index.
+    telephone: real(BUSINESS.telephone),
+    email: real(BUSINESS.email),
     priceRange: BUSINESS.priceRange,
     currenciesAccepted: "INR",
     address: {
       "@type": "PostalAddress",
-      streetAddress: BUSINESS.streetAddress,
+      streetAddress: real(BUSINESS.streetAddress),
+      // Locality, region and country are KNOWN and stay. "A confectioner in Ratnagiri,
+      // Maharashtra" is true and useful today; the street simply is not known yet.
       addressLocality: BUSINESS.primaryLocality,
       addressRegion: BUSINESS.regionCode,
-      postalCode: BUSINESS.postalCode,
+      postalCode: real(BUSINESS.postalCode),
       addressCountry: BUSINESS.country,
     },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: BUSINESS.geo.latitude,
-      longitude: BUSINESS.geo.longitude,
-    },
-    openingHoursSpecification: BUSINESS.openingHours.map((slot) => ({
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: slot.days,
-      opens: slot.opens,
-      closes: slot.closes,
-    })),
+    ...(NAP_VERIFIED
+      ? {
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: BUSINESS.geo.latitude,
+            longitude: BUSINESS.geo.longitude,
+          },
+          openingHoursSpecification: BUSINESS.openingHours.map((slot) => ({
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: slot.days,
+            opens: slot.opens,
+            closes: slot.closes,
+          })),
+        }
+      : {}),
     areaServed: [
       ...BUSINESS.servesNearby.map((place) => ({
         "@type": "City",
@@ -134,6 +173,6 @@ export function localBusinessSchema(siteUrl: string) {
         ? [{ "@type": "Country", name: "India" }]
         : []),
     ],
-    hasMap: BUSINESS.mapsUrl,
+    hasMap: real(BUSINESS.mapsUrl),
   };
 }

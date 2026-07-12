@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BUSINESS, formattedAddress } from "@/lib/business";
+import { BUSINESS, formattedAddress, isPlaceholder } from "@/lib/business";
 import { SOCIALS } from "@/lib/nav";
 import { OCCASIONS } from "@/lib/occasions";
 import { SITE } from "@/lib/site";
@@ -15,7 +15,6 @@ import { SITE } from "@/lib/site";
  * two entities, and neither ranks.
  */
 
-const isPlaceholder = (value: string) => value.startsWith("TODO");
 
 const COMPANY = [
   { label: "Our Story", href: "/about" },

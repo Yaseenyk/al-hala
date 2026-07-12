@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { BUSINESS, formattedAddress } from "@/lib/business";
+import { BUSINESS, formattedAddress, isPlaceholder } from "@/lib/business";
 
 /**
  * The Ratnagiri section. A Server Component — no state, nothing to hydrate.
@@ -31,8 +31,6 @@ const CRAFT = [
   },
 ];
 
-/** A TODO left in `business.ts` must never render as the literal string "TODO:" on a page. */
-const isPlaceholder = (value: string) => value.startsWith("TODO");
 
 export function StoreSection() {
   const hasAddress = !isPlaceholder(BUSINESS.streetAddress);
