@@ -131,9 +131,76 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /*
+     Tailwind v4's Preflight sets `cursor: default` on buttons. v3 set `cursor: pointer`.
+
+     This is a deliberate upstream change (it matches the raw browser default), and it is
+     also the single most common "why does this feel broken" complaint after a v4 upgrade:
+     every button in the app silently shows an arrow instead of a hand, and the whole UI
+     reads as inert. Put it back.
+  */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary,
+  label[for],
+  select {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+
+  /*
+     One focus ring, everywhere, in gold.
+
+     `:focus-visible` and not `:focus`: a mouse user clicking a button should not get a
+     ring, but a keyboard user tabbing to it MUST. Removing outlines without replacing them
+     is the most common way a site becomes unusable without a mouse.
+  */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--accent);
+    color: var(--brand-deep);
+  }
+
+  /* Anchor-jumps glide rather than teleport — but never for someone who asked motion to stop. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 }
 
 @layer utilities {
+  /*
+     The fold.
+
+     `min-h-dvh` on a section BELOW a sticky header overflows the viewport by exactly the
+     header's height — sticky elements occupy flow space, unlike fixed ones — so the page
+     gains a permanent scrollbar and the hero's last row is always cut off.
+
+     A utility rather than an arbitrary value, because `min-h-[calc(100dvh-7.5rem)]` is a
+     lint error here and, more to the point, a magic number smeared across every hero that
+     ever needs it.
+  */
+  .min-h-fold {
+    min-height: calc(100dvh - 5rem); /* main bar only; the utility strip is md-and-up */
+  }
+
+  @media (min-width: 48rem) {
+    .min-h-fold {
+      min-height: calc(100dvh - 7.5rem); /* utility strip + main bar */
+    }
+  }
+
   /*
      Grain.
 

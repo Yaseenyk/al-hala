@@ -4,9 +4,8 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
-import { OptimizedImage } from "@/components/core/OptimizedImage";
 import { HeroOrnaments } from "@/components/features/HeroOrnaments";
-import { SiteHeader } from "@/components/ui/SiteHeader";
+import { GiftBoxMark } from "@/components/ui/GiftBoxMark";
 import { useIsRtl } from "@/lib/animations/motion-utils";
 import {
   floatingElement,
@@ -40,21 +39,26 @@ interface Skin {
   washVar: string;
   /** Colour of the ornament field. Everything strokes with currentColor. */
   ornamentTone: string;
-  /** The animation, recoloured onto the brand ramp by scripts/recolor. */
-  animation: string;
-  animationAlt: string;
-  /**
-   * Static fallback for `prefers-reduced-motion`.
-   *
-   * SMIL cannot be stopped by CSS — `prefers-reduced-motion` has no effect on it and
-   * there is no `animation-play-state` to reach for. The only honest way to honour the
-   * setting is to not load the animated file at all, and serve the still mark instead.
-   *
-   * The mark ships in two cuts: `-light` (deep-green tile, for light grounds) and `-dark`
-   * (the paler tile, for dark grounds). Pick the cut — never recolour it with CSS.
-   */
-  mark: string;
 }
+
+/*
+ * The hero artwork is `GiftBoxMark` — a drawn line-art box, the same on every slide.
+ *
+ * The Lottie/SVG illustrations in /public/lottie are NOT wired in. Two things killed them:
+ *
+ *   1. Style. They are flat cartoon vector art, and next to Cormorant hairlines and gold
+ *      rules the cartoon wins — visual hierarchy is ruthless, and the cheapest element on
+ *      a page sets the register for the whole page.
+ *   2. Coherence. Four illustrations by four artists is a stock-art collage, not a brand.
+ *
+ * Recolouring them was tried and reverted: a luminance remap works on abstract shapes and
+ * DESTROYS character illustration — forms separated only by hue merge into one blob, while
+ * the animation keeps running perfectly underneath, so it presents as an animation bug when
+ * it is not. Pick artwork that already sits with the palette; do not repaint artwork to fit
+ * it.
+ *
+ * The files stay on disk for when real photography or a commissioned set arrives.
+ */
 
 const SKINS: Record<string, Skin> = {
   nikah: {
@@ -67,9 +71,6 @@ const SKINS: Record<string, Skin> = {
     glowVar: "--brand-saffron",
     washVar: "--brand-green",
     ornamentTone: "text-saffron",
-    animation: "/lottie/couple-eating.brand.svg",
-    animationAlt: "Two figures sharing sweets from a gift box",
-    mark: "/brand/alhala-mark-light.svg",
   },
   kids: {
     surface: "bg-hala-green",
@@ -81,9 +82,6 @@ const SKINS: Record<string, Skin> = {
     glowVar: "--brand-saffron-soft",
     washVar: "--brand-deep",
     ornamentTone: "text-saffron-ring",
-    animation: "/lottie/rabbit-candy.brand.svg",
-    animationAlt: "A rabbit reaching for a sweet",
-    mark: "/brand/alhala-mark-dark.svg",
   },
   valentines: {
     surface: "bg-deep-green",
@@ -95,9 +93,6 @@ const SKINS: Record<string, Skin> = {
     glowVar: "--brand-saffron-soft",
     washVar: "--brand-green",
     ornamentTone: "text-saffron-ring",
-    animation: "/lottie/gift-referral.brand.svg",
-    animationAlt: "A gift box opening",
-    mark: "/brand/alhala-mark-dark.svg",
   },
   eid: {
     surface: "bg-cream",
@@ -109,9 +104,6 @@ const SKINS: Record<string, Skin> = {
     glowVar: "--brand-green",
     washVar: "--brand-saffron",
     ornamentTone: "text-hala-green",
-    animation: "/lottie/gift-premium.brand.svg",
-    animationAlt: "A gift box unwrapping",
-    mark: "/brand/alhala-mark-light.svg",
   },
 };
 
@@ -138,7 +130,7 @@ export function ProductShowcase() {
       // min-h-dvh, not min-h-screen: `100vh` on mobile Safari/Chrome measures the viewport
       // WITHOUT the browser chrome, so a 100vh hero is always taller than the visible area
       // and the bottom is permanently cut off. `dvh` tracks the real, dynamic viewport.
-      className={`grain relative flex min-h-dvh flex-col transition-colors duration-700 ease-in-out ${skin.surface} ${skin.ink}`}
+      className={`grain min-h-fold relative flex flex-col transition-colors duration-700 ease-in-out ${skin.surface} ${skin.ink}`}
     >
       {/* The ground.
           TWO gradients, not one: a single radial over a flat colour is still a flat colour
@@ -166,7 +158,6 @@ export function ProductShowcase() {
       {/* Candies, lollipops, stars. Line art, drifting and twinkling. */}
       <HeroOrnaments tone={skin.ornamentTone} animate={animate} />
 
-      <SiteHeader muted={skin.muted} rule={skin.rule} panel={skin.surface} />
 
       {/* Two columns, not one stack.
           Stacked, the artwork + eyebrow + headline + Arabic + rule + copy + CTA is taller
@@ -183,10 +174,13 @@ export function ProductShowcase() {
             exit="exit"
             className="mx-auto grid w-full max-w-6xl items-center gap-8 md:grid-cols-2 md:gap-16"
           >
+            {/* The gift box, drawn in a gold hairline. One mark for every occasion — the
+                artwork is the SAME on all four, and only the tone changes. That is the
+                point: a coherent brand beats four illustrations from four artists. */}
             <motion.div
               variants={slideVariants}
               custom={slideCustom}
-              className="relative mx-auto size-40 sm:size-48 md:order-2 md:size-64 lg:size-96"
+              className="relative mx-auto size-48 sm:size-64 md:order-2 md:size-80 lg:size-96"
             >
               <motion.div
                 variants={floatingElement}
@@ -195,16 +189,11 @@ export function ProductShowcase() {
                 animate={animate ? "float" : "still"}
                 className="relative size-full"
               >
-                <OptimizedImage
-                  src={animate ? skin.animation : skin.mark}
-                  alt={animate ? skin.animationAlt : "Al-Hala Candies"}
-                  fill
-                  priority
-                  // Passed through untouched: the optimiser rasterises SVG, and the SMIL
-                  // animation would die with it — silently, leaving a still frame.
-                  unoptimized
-                  sizes="(min-width: 1024px) 384px, (min-width: 768px) 320px, 192px"
-                  className="object-contain"
+                <GiftBoxMark
+                  key={item.id}
+                  tone={skin.accent}
+                  animate={animate}
+                  className="size-full"
                 />
               </motion.div>
             </motion.div>

@@ -18,15 +18,19 @@ export const SITE_URL = (
 
 export const SITE = {
   name: "Al-Hala Candies",
-  /** Under 60 chars, or Google truncates it in the SERP. */
-  title: "Al-Hala Candies — Premium Gift Boxes & Handmade Sweets",
+  /**
+   * Under 60 chars, or Google truncates it. The LOCALITY goes in the title, because
+   * "candy shop in Ratnagiri" is the query this business has to win, and a title that
+   * does not contain the town cannot compete for it.
+   */
+  title: "Al-Hala Candies — Handmade Gift Boxes in Ratnagiri",
   /**
    * Under 155 chars. This is the line that decides whether a human clicks, and — more and
-   * more — the line an LLM quotes back when asked what this company does. It should read
-   * as an answer to a question, not as a keyword list.
+   * more — the line an LLM quotes back when asked what this company does. So it must READ
+   * AS AN ANSWER, not as a keyword list: entity, place, product, in that order.
    */
   description:
-    "Handmade saffron, pistachio and rose confectionery in keepsake gift boxes. Build your own box for weddings, Eid, Valentine's, corporate gifts and every occasion.",
+    "Handmade candy and custom gift boxes in Ratnagiri. Alphonso, cashew, kokum and saffron sweets, boxed by hand for weddings, Eid and every occasion. Delivered across Maharashtra and India.",
   locale: "en",
   ogImage: "/alhala-og-card-1200x630.png",
 } as const;

@@ -22,7 +22,7 @@ const eslintConfig = defineConfig([
       "tailwindcss/no-arbitrary-value": "error",
       // `grain` is a real utility declared in globals.css @layer utilities; the plugin
       // reads the @theme, not the layers, so it cannot see it. Whitelist, do not disable.
-      "tailwindcss/no-custom-classname": ["error", { whitelist: ["grain"] }],
+      "tailwindcss/no-custom-classname": ["error", { whitelist: ["grain", "min-h-fold"] }],
       "tailwindcss/no-contradicting-classname": "error",
       "tailwindcss/enforces-shorthand": "warn",
       "tailwindcss/classnames-order": "warn",

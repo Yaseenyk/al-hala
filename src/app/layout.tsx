@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Amiri, Cormorant_Garamond, Jost } from "next/font/google";
 
+import { SiteHeader } from "@/components/ui/SiteHeader";
 import { SITE, SITE_URL } from "@/lib/site";
 
 import "./globals.css";
@@ -50,12 +51,18 @@ export const metadata: Metadata = {
   description: SITE.description,
   applicationName: SITE.name,
   keywords: [
-    "gift boxes",
-    "handmade candy",
-    "wedding favours",
-    "Eid gifts",
-    "corporate gifting",
+    // Local intent first — this is the business's home turf and its highest-converting
+    // traffic. A generic "gift boxes" query is national, expensive, and someone else's.
+    "candy shop in Ratnagiri",
+    "best candy shop Ratnagiri",
+    "gift box Ratnagiri",
+    "Ratnagiri Alphonso sweets",
+    "Konkan cashew candy",
+    "wedding favours Ratnagiri",
+    "Eid gift box Maharashtra",
+    "handmade candy India",
     "build your own gift box",
+    "corporate gifting Ratnagiri",
   ],
   authors: [{ name: SITE.name }],
   creator: SITE.name,
@@ -137,7 +144,10 @@ export default function RootLayout({
       className={`${jost.variable} ${cormorant.variable} ${amiri.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <SiteHeader />
+        {children}
+      </body>
     </html>
   );
 }
