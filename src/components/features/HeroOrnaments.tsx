@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 import {
   floatingElement,
@@ -49,7 +49,9 @@ interface Ornament {
   start: string;
   /** Legal spacing steps only. size-3/size-5 do not exist. */
   size: string;
-  opacity: string;
+  /** A NUMBER, not an `opacity-*` class: the hero scales it per slide by `emphasis`, and a
+   *  static utility cannot be multiplied at runtime. */
+  opacity: number;
   float: FloatCustom;
 }
 
@@ -61,7 +63,7 @@ const DRIFTERS: readonly Ornament[] = [
     top: "18%",
     start: "8%",
     size: "size-16",
-    opacity: "opacity-30",
+    opacity: 0.3,
     float: { distance: 16, rotate: 10, duration: 11 },
   },
   {
@@ -70,7 +72,7 @@ const DRIFTERS: readonly Ornament[] = [
     top: "62%",
     start: "13%",
     size: "size-12",
-    opacity: "opacity-25",
+    opacity: 0.25,
     float: { distance: 12, rotate: -8, duration: 13, delay: 1.4 },
   },
   {
@@ -79,7 +81,7 @@ const DRIFTERS: readonly Ornament[] = [
     top: "72%",
     start: "82%",
     size: "size-12",
-    opacity: "opacity-25",
+    opacity: 0.25,
     float: { distance: 14, rotate: -12, duration: 12, delay: 0.7 },
   },
   {
@@ -88,7 +90,7 @@ const DRIFTERS: readonly Ornament[] = [
     top: "14%",
     start: "88%",
     size: "size-10",
-    opacity: "opacity-30",
+    opacity: 0.3,
     float: { distance: 14, rotate: 14, duration: 14, delay: 2.1 },
   },
   {
@@ -97,7 +99,7 @@ const DRIFTERS: readonly Ornament[] = [
     top: "42%",
     start: "94%",
     size: "size-8",
-    opacity: "opacity-20",
+    opacity: 0.2,
     float: { distance: 10, rotate: -6, duration: 15, delay: 1 },
   },
   {
@@ -106,7 +108,7 @@ const DRIFTERS: readonly Ornament[] = [
     top: "84%",
     start: "40%",
     size: "size-6",
-    opacity: "opacity-20",
+    opacity: 0.2,
     float: { distance: 18, rotate: 8, duration: 16, delay: 2.6 },
   },
   {
@@ -115,8 +117,53 @@ const DRIFTERS: readonly Ornament[] = [
     top: "8%",
     start: "62%",
     size: "size-10",
-    opacity: "opacity-20",
+    opacity: 0.2,
     float: { distance: 12, rotate: 9, duration: 17, delay: 3 },
+  },
+];
+
+/**
+ * A denser layer, rendered ONLY when a slide sets `emphasis > 1`. It fills the middle band
+ * the base scatter leaves open, so "candies flowing" reads as flow and not as two lonely
+ * bonbons. Kept off every other slide, which is why it is a separate set and not baked into
+ * DRIFTERS.
+ */
+const EXTRA_DRIFTERS: readonly Ornament[] = [
+  {
+    id: "x-candy-1",
+    shape: "candy",
+    top: "34%",
+    start: "34%",
+    size: "size-10",
+    opacity: 0.22,
+    float: { distance: 14, rotate: -10, duration: 12, delay: 0.5 },
+  },
+  {
+    id: "x-lolli-1",
+    shape: "lollipop",
+    top: "52%",
+    start: "56%",
+    size: "size-12",
+    opacity: 0.2,
+    float: { distance: 12, rotate: 8, duration: 14, delay: 1.7 },
+  },
+  {
+    id: "x-candy-2",
+    shape: "candy",
+    top: "80%",
+    start: "54%",
+    size: "size-8",
+    opacity: 0.24,
+    float: { distance: 16, rotate: 12, duration: 13, delay: 2.4 },
+  },
+  {
+    id: "x-petal-1",
+    shape: "petal",
+    top: "30%",
+    start: "50%",
+    size: "size-8",
+    opacity: 0.22,
+    float: { distance: 12, rotate: -8, duration: 15, delay: 3.2 },
   },
 ];
 
@@ -147,16 +194,26 @@ interface HeroOrnamentsProps {
   /** Tailwind text colour class. Everything strokes with currentColor, so this recolours
    *  the whole field per slide. */
   tone: string;
-  animate: boolean;
+  /** Explicit on/off. OMIT it — as a server-rendered page must — and the field respects the
+   *  viewer's reduced-motion preference on its own. The carousel passes it because it
+   *  already computes the preference for the whole slide. */
+  animate?: boolean;
+  /** Scales the drifting field's opacity and, above 1, adds the denser `EXTRA_DRIFTERS`
+   *  layer. Default 1 leaves the field byte-for-byte its restrained self. */
+  emphasis?: number;
 }
 
-export function HeroOrnaments({ tone, animate }: HeroOrnamentsProps) {
+export function HeroOrnaments({ tone, animate, emphasis = 1 }: HeroOrnamentsProps) {
+  const reduceMotion = useReducedMotion();
+  const isAnimating = animate ?? !reduceMotion;
+  const drifters = emphasis > 1 ? [...DRIFTERS, ...EXTRA_DRIFTERS] : DRIFTERS;
+
   return (
     <div
       aria-hidden
       className={`pointer-events-none absolute inset-0 overflow-hidden ${tone}`}
     >
-      {DRIFTERS.map((ornament) => (
+      {drifters.map((ornament) => (
         <motion.svg
           key={ornament.id}
           viewBox="0 0 24 24"
@@ -165,12 +222,18 @@ export function HeroOrnaments({ tone, animate }: HeroOrnamentsProps) {
           strokeWidth={1}
           strokeLinecap="round"
           strokeLinejoin="round"
-          className={`absolute ${ornament.size} ${ornament.opacity}`}
-          style={{ top: ornament.top, insetInlineStart: ornament.start }}
+          // transition-opacity so a slide's emphasis eases in with its colour crossfade
+          // rather than snapping. Cap at 0.75 — a background field never becomes foreground.
+          className={`absolute ${ornament.size} transition-opacity duration-700`}
+          style={{
+            top: ornament.top,
+            insetInlineStart: ornament.start,
+            opacity: Math.min(ornament.opacity * emphasis, 0.75),
+          }}
           variants={floatingElement}
           custom={ornament.float}
           initial="still"
-          animate={animate ? "float" : "still"}
+          animate={isAnimating ? "float" : "still"}
         >
           <path d={PATHS[ornament.shape]} />
         </motion.svg>
@@ -191,7 +254,7 @@ export function HeroOrnaments({ tone, animate }: HeroOrnamentsProps) {
           custom={star.twinkle}
           initial="still"
           // Under reduced motion they hold at a steady 50% — present, but not pulsing.
-          animate={animate ? "twinkling" : "still"}
+          animate={isAnimating ? "twinkling" : "still"}
         >
           <path d={PATHS[star.shape]} />
         </motion.svg>

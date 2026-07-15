@@ -4,7 +4,9 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+import { OptimizedImage } from "@/components/core/OptimizedImage";
 import { ACTIVE_SOCIALS, ICONS, PRIMARY_NAV, type NavLink } from "@/lib/nav";
+import { BASE_PATH } from "@/lib/site";
 import { useCartCount, useWishlistCount } from "@/store/cart";
 
 /**
@@ -59,7 +61,15 @@ function Badge({ count }: { count: number }) {
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
-  const [occasionsOpen, setOccasionsOpen] = useState(false);
+  /**
+   * WHICH menu is open, not WHETHER one is.
+   *
+   * A single boolean here is the bug it looks like: every entry in PRIMARY_NAV with
+   * children is handed the same flag, so Occasions and Shop stop being two menus and
+   * become one boolean rendered twice — open either and both drop down together. Keyed by
+   * href, so the state scales with the nav instead of being renamed per entry.
+   */
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
 
   const cartCount = useCartCount();
@@ -75,22 +85,22 @@ export function SiteHeader() {
    */
   const closeAll = () => {
     setOpen(false);
-    setOccasionsOpen(false);
+    setOpenMenu(null);
   };
 
   // A full-screen overlay with no keyboard exit is a trap for anyone not using a mouse.
   useEffect(() => {
-    if (!open && !occasionsOpen) return;
+    if (!open && openMenu === null) return;
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setOpen(false);
-        setOccasionsOpen(false);
+        setOpenMenu(null);
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, occasionsOpen]);
+  }, [open, openMenu]);
 
   return (
     <header className="sticky top-0 z-50">
@@ -127,28 +137,52 @@ export function SiteHeader() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-8 px-6 py-4 md:px-16">
           <Link
             href="/"
-            className="font-display text-lg tracking-widest uppercase md:text-xl"
+            onClick={closeAll}
+            className="flex shrink-0 items-center gap-2 font-display text-lg tracking-widest uppercase md:text-xl"
           >
-            Al-Hala
+            {/* The ح monogram tile, LEADING the wordmark. The PNG, not the SVG: the SVG sets
+                ح in live Amiri type, which does not load inside an <img> and would fall back
+                to a system glyph. Decorative — the wordmark beside it already names the link,
+                so an alt would just announce "Al-Hala" twice. BASE_PATH-prefixed because an
+                unoptimized next/image does not prepend basePath (it 404s on GitHub Pages). */}
+            <OptimizedImage
+              src={`${BASE_PATH}/brand/alhala-monogram-1024.png`}
+              decorative
+              width={32}
+              height={32}
+              className="size-8"
+            />
+            {/* whitespace-nowrap: "AL-HALA" must never break at its hyphen onto two lines. */}
+            <span className="whitespace-nowrap">Al-Hala</span>
           </Link>
 
           {/* Desktop nav */}
           <nav aria-label="Primary" className="hidden md:block">
-            <ul className="flex items-center gap-8 text-xs tracking-widest uppercase">
+            <ul className="flex items-center gap-2 text-xs tracking-widest uppercase">
               {PRIMARY_NAV.map((entry) => (
                 <li key={entry.href} className="relative">
                   {entry.children ? (
                     <DesktopDropdown
                       entry={entry}
-                      open={occasionsOpen}
-                      onToggle={() => setOccasionsOpen((value) => !value)}
+                      open={openMenu === entry.href}
+                      // Opening one menu closes the other — two panels overlapping in a
+                      // menu bar is not a state a user ever asked for.
+                      onToggle={() =>
+                        setOpenMenu((current) =>
+                          current === entry.href ? null : entry.href,
+                        )
+                      }
                       onNavigate={closeAll}
                       reduceMotion={reduceMotion ?? false}
                     />
                   ) : (
+                    // closeAll, like every other nav click: the header persists across
+                    // navigation, so a plain link that does NOT close leaves the OTHER
+                    // menu's panel hanging open on the page it lands on.
                     <Link
                       href={entry.href}
-                      className="transition-colors duration-300 hover:text-saffron"
+                      onClick={closeAll}
+                      className="inline-block rounded-full border border-cocoa-ink p-2 whitespace-nowrap transition-colors duration-300 hover:border-saffron hover:text-saffron"
                     >
                       {entry.label}
                     </Link>
@@ -163,6 +197,7 @@ export function SiteHeader() {
           <div className="flex items-center gap-2">
             <Link
               href="/search"
+              onClick={closeAll}
               aria-label="Search"
               className="hidden size-12 place-items-center rounded-full transition-colors duration-300 hover:bg-cocoa-ink/5 hover:text-saffron active:scale-95 md:grid"
             >
@@ -171,6 +206,7 @@ export function SiteHeader() {
 
             <Link
               href="/account"
+              onClick={closeAll}
               aria-label="Account"
               className="hidden size-12 place-items-center rounded-full transition-colors duration-300 hover:bg-cocoa-ink/5 hover:text-saffron active:scale-95 md:grid"
             >
@@ -179,6 +215,7 @@ export function SiteHeader() {
 
             <Link
               href="/wishlist"
+              onClick={closeAll}
               aria-label={`Wishlist, ${wishCount} items`}
               className="relative grid size-12 place-items-center rounded-full transition-colors duration-300 hover:bg-cocoa-ink/5 hover:text-saffron active:scale-95"
             >
@@ -188,6 +225,7 @@ export function SiteHeader() {
 
             <Link
               href="/cart"
+              onClick={closeAll}
               aria-label={`Cart, ${cartCount} items`}
               className="relative grid size-12 place-items-center rounded-full transition-colors duration-300 hover:bg-cocoa-ink/5 hover:text-saffron active:scale-95"
             >
@@ -310,7 +348,13 @@ function DesktopDropdown({
         onClick={onToggle}
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex items-center gap-2 tracking-widest uppercase transition-colors duration-300 hover:text-saffron"
+        // Black-outline pill by default; light-green fill (hala-green faded over cream) once
+        // the menu is open, so the trigger reads as "active" while its panel is showing.
+        className={`flex items-center gap-2 rounded-full border p-2 tracking-widest whitespace-nowrap uppercase transition-colors duration-300 ${
+          open
+            ? "border-hala-green bg-hala-green/10 text-deep-green"
+            : "border-cocoa-ink hover:border-saffron hover:text-saffron"
+        }`}
       >
         {entry.label}
         <Icon

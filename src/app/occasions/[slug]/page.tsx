@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { JsonLd } from "@/components/core/JsonLd";
-import { GiftBoxMark } from "@/components/ui/GiftBoxMark";
+import { OptimizedImage } from "@/components/core/OptimizedImage";
+import { HeroOrnaments } from "@/components/features/HeroOrnaments";
 import { BUSINESS } from "@/lib/business";
 import { OCCASIONS, occasionBySlug } from "@/lib/occasions";
 import { SITE, SITE_URL, absolute } from "@/lib/site";
@@ -107,12 +108,28 @@ export default async function OccasionPage({ params }: Params) {
       <JsonLd data={page} />
 
       <main>
-        {/* Hero */}
-        <section className="grain relative bg-cream text-cocoa-ink">
-          <div className="mx-auto max-w-6xl px-6 py-16 sm:px-8 md:px-16 md:py-24">
+        {/* Hero. `heroCandyField` occasions swap the cream ground for a light-green tint —
+            hala-green faded over cream, the only on-brand "light green" — and float the same
+            drifting-candy field the home carousel uses behind the content. */}
+        <section
+          className={`grain relative text-cocoa-ink ${
+            occasion.heroCandyField ? "bg-hala-green/10" : "bg-cream"
+          }`}
+        >
+          {occasion.heroCandyField ? (
+            // No `animate` prop: the field reads the viewer's reduced-motion preference
+            // itself. Gold candies on light green — the brand's core pairing.
+            <HeroOrnaments tone="text-saffron" emphasis={1.7} />
+          ) : null}
+
+          <div className="relative mx-auto max-w-6xl px-6 py-16 sm:px-8 md:px-16 md:py-24">
             <Breadcrumbs occasion={occasion.title} />
 
-            <div className="mt-16 grid items-center gap-16 md:grid-cols-2 md:gap-24">
+            <div
+              className={`mt-16 grid items-center gap-16 md:gap-24 ${
+                occasion.art ? "md:grid-cols-2" : ""
+              }`}
+            >
               <div className="flex flex-col items-start gap-6">
                 <span className="text-xs tracking-widest text-saffron uppercase">
                   {occasion.eyebrow}
@@ -157,9 +174,36 @@ export default async function OccasionPage({ params }: Params) {
                 </Link>
               </div>
 
-              <div className="relative mx-auto size-64 md:size-80 lg:size-96">
-                <GiftBoxMark tone="text-saffron" animate className="size-full" />
-              </div>
+              {/* The occasion's own artwork, when it has one — same `occasion.art` the home
+                  carousel reads, so the two cannot disagree. Occasions without art run
+                  text-only: no placeholder mark, and the grid drops to a single column above
+                  so the copy is not stranded beside an empty half.
+
+                  `opaqueBackground` art gets a cream ground and softened corners, and is held
+                  at 70% so the page's own cream comes UP through it — the block reads as a
+                  panel that belongs to the page rather than a foreign rectangle laid on top of
+                  it. A cut-out (alpha) needs none of this and gets none of it. */}
+              {occasion.art ? (
+                <div
+                  className={`relative mx-auto size-64 md:size-80 lg:size-96 ${
+                    occasion.art.opaqueBackground
+                      ? "overflow-hidden rounded-lg bg-cream"
+                      : ""
+                  }`}
+                >
+                  {/* Above the fold, so `priority`. Product imagery does NOT mirror in RTL. */}
+                  <OptimizedImage
+                    src={occasion.art.src}
+                    alt={occasion.art.alt}
+                    fill
+                    priority
+                    sizes="(min-width: 1024px) 384px, (min-width: 768px) 320px, 256px"
+                    className={`object-contain ${
+                      occasion.art.opaqueBackground ? "opacity-70" : ""
+                    }`}
+                  />
+                </div>
+              ) : null}
             </div>
           </div>
         </section>

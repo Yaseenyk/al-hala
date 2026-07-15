@@ -17,6 +17,53 @@
  * each page genuinely about its own occasion. Do not reduce them to a template.
  */
 
+import { BASE_PATH } from "@/lib/site";
+
+/**
+ * Supplied hero artwork for an occasion. Absent on most of them — see `art` below.
+ */
+export interface OccasionArt {
+  /**
+   * MUST carry the `BASE_PATH` prefix.
+   *
+   * `next/link` and the `next/image` OPTIMISER apply basePath for you — but static export
+   * forces `images.unoptimized`, which hands the src through untouched, so a bare
+   * "/lottie/x.png" resolves to the ORIGIN root and 404s on a project page served from
+   * /al-hala. It fails silently: correct markup, correct alt, no error from Next, just a
+   * blank square.
+   */
+  src: string;
+  /**
+   * SEO copy, not a filename.
+   *
+   * If the artwork has words baked into its pixels, they are invisible to Google and to a
+   * screen reader — this string is the ONLY place they exist. Put them here.
+   */
+  alt: string;
+  /**
+   * Also render on the HOME CAROUSEL slide, not only the occasion page. Opt-IN, and
+   * deliberately so.
+   *
+   * The occasion pages are all cream. The carousel is NOT: `SKINS` in ProductShowcase puts
+   * kids and valentines on `bg-deep-green`. Artwork that sits happily on a cream page can
+   * read as pasted-on over deep green, so a slide has to earn this flag by being looked at
+   * against its own surface. Default is page-only, which is the safe answer.
+   */
+  inCarousel?: boolean;
+  /**
+   * The asset is a rectangle with its own opaque background, not a cut-out.
+   *
+   * A statement about the FILE, not a style — the component owns the treatment. It settles
+   * the artwork into the page (a cream ground showing through, softened corners) instead of
+   * letting a hard-edged foreign block sit on the cream.
+   *
+   * It is a mitigation, not a fix. The real fix is an asset with an alpha channel; CSS
+   * cannot isolate a background that is baked into the pixels, so the whole image is
+   * tempered, subject included. Prefer supplying a cut-out.
+   */
+  opaqueBackground?: boolean;
+}
+
 export interface Occasion {
   id: string;
   /** URL segment. Becomes /occasions/<slug>. */
@@ -30,6 +77,20 @@ export interface Occasion {
   description: string;
   /** One line for the grid — shorter and blunter than the hero description. */
   teaser: string;
+
+  /**
+   * Hero artwork for this occasion's PAGE, and — only if it sets `inCarousel` — for its
+   * home carousel slide too. Anything without it falls back to `GiftBoxMark`, the drawn
+   * line-art box, which remains the default rather than the exception.
+   */
+  art?: OccasionArt;
+
+  /**
+   * Opt this occasion's PAGE hero into the light-green ground and the drifting-candy field
+   * (the same ornament component the home carousel uses). Off by default — most pages stay
+   * plain cream. It is the page counterpart of a carousel slide's `ornamentEmphasis`.
+   */
+  heroCandyField?: boolean;
 
   /** The <title>. Under 60 chars, and it carries the locality. */
   metaTitle: string;
@@ -53,6 +114,12 @@ export const OCCASIONS: readonly Occasion[] = [
     description:
       "Saffron, pistachio, and rose — pressed by hand, sealed in gold, and set in a keepsake box worthy of the day.",
     teaser: "Favours and keepsake boxes for the wedding, the walima, and every guest.",
+    // Cream slide, transparent cut-out — so it earns the carousel too.
+    art: {
+      src: `${BASE_PATH}/lottie/hero-flowers-chocolate.png`,
+      alt: "A bouquet of pink tulips wrapped in paper, resting on a ribbon-tied gift box of Al-Hala chocolates",
+      inCarousel: true,
+    },
     metaTitle: "Wedding Favours & Nikah Gift Boxes in Ratnagiri",
     metaDescription:
       "Handmade wedding favours and nikah gift boxes from Al-Hala Candies, Ratnagiri. Saffron, pistachio and rose sweets in keepsake boxes. Bulk orders for the walima, delivered across Maharashtra.",
@@ -84,6 +151,8 @@ export const OCCASIONS: readonly Occasion[] = [
     description:
       "Bright, bold, and gone in a week. Birthday parties, class treats, and the box that buys you an afternoon of quiet.",
     teaser: "Birthdays, party favours, and treats that vanish before the candles cool.",
+    // Light-green ground + drifting candies on the page hero.
+    heroCandyField: true,
     metaTitle: "Birthday Party Favours & Kids' Candy Boxes, Ratnagiri",
     metaDescription:
       "Birthday party favours and kids' candy boxes from Al-Hala Candies in Ratnagiri. Small boxes for class treats and return gifts, handmade and priced for a whole classroom.",
@@ -115,6 +184,21 @@ export const OCCASIONS: readonly Occasion[] = [
     description:
       "Twelve pieces, wrapped in gold leaf. Available until the fourteenth, and not a day after.",
     teaser: "Twelve pieces in gold leaf. Gone on the fifteenth.",
+    /**
+     * NO `inCarousel`: this artwork is an OPAQUE raster, and the carousel slide is
+     * `bg-deep-green` — it belongs on the cream/green PAGE, not the dark slide.
+     *
+     * ⚠️ PLACEHOLDER: this is a watermarked stock preview at 260×280. Swap for a licensed,
+     * full-resolution file before production — ideally a transparent cut-out, which would
+     * also let `opaqueBackground` come off.
+     */
+    art: {
+      src: `${BASE_PATH}/lottie/valentines-couple.webp`,
+      alt: "A cartoon couple on Valentine's Day, one kneeling to offer a heart-shaped lollipop, among floating hearts",
+      opaqueBackground: true,
+    },
+    // Light-green ground + drifting candies on the page hero.
+    heroCandyField: true,
     metaTitle: "Valentine's Day Chocolate & Candy Gift Box, Ratnagiri",
     metaDescription:
       "The Valentine's Edit from Al-Hala Candies, Ratnagiri — twelve handmade pieces in gold leaf, boxed and delivered with your note. Limited release, local delivery and nationwide shipping.",
@@ -147,6 +231,9 @@ export const OCCASIONS: readonly Occasion[] = [
     description:
       "The box that arrives before the prayer and is empty before the evening. Sized for a household, priced for many.",
     teaser: "For the family, the neighbours, and everyone who comes by unannounced.",
+    // Light-green ground + drifting candies on the page hero. The field already carries a
+    // crescent and stars, which suit Eid.
+    heroCandyField: true,
     metaTitle: "Eid Gift Boxes & Sweets in Ratnagiri",
     metaDescription:
       "Eid gift boxes from Al-Hala Candies, Ratnagiri. Handmade saffron, pistachio and Alphonso sweets, sized for a household and priced so you can send several. Eid al-Fitr and Eid al-Adha.",
@@ -179,6 +266,8 @@ export const OCCASIONS: readonly Occasion[] = [
     description:
       "Dates, saffron, and something sweet for the moment the fast breaks.",
     teaser: "Something sweet for the moment the fast breaks.",
+    // Light-green ground + drifting candies (with crescent and stars) on the page hero.
+    heroCandyField: true,
     metaTitle: "Ramadan & Iftar Sweets Box in Ratnagiri",
     metaDescription:
       "Ramadan and iftar sweet boxes from Al-Hala Candies, Ratnagiri. Dates, saffron and handmade sweets for breaking the fast, and for sending to the mosque. Local delivery across Ratnagiri district.",

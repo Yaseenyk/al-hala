@@ -4,6 +4,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
+import { OptimizedImage } from "@/components/core/OptimizedImage";
 import { HeroOrnaments } from "@/components/features/HeroOrnaments";
 import { GiftBoxMark } from "@/components/ui/GiftBoxMark";
 import { useIsRtl } from "@/lib/animations/motion-utils";
@@ -39,12 +40,19 @@ interface Skin {
   washVar: string;
   /** Colour of the ornament field. Everything strokes with currentColor. */
   ornamentTone: string;
+  /** Multiplies the drifting-candy field's opacity and adds a denser set. 1 = the default,
+   *  restrained scatter; above 1, candies visibly flow. Omitted on most slides. */
+  ornamentEmphasis?: number;
 }
 
 /*
- * The hero artwork is `GiftBoxMark` — a drawn line-art box, the same on every slide.
+ * The hero artwork is `GiftBoxMark` — a drawn line-art box — on every slide EXCEPT those
+ * whose occasion declares an `art` AND marks it `inCarousel` (see `Occasion.art` in
+ * lib/occasions.ts). The occasion PAGE reads the same `art`, so the two surfaces cannot
+ * show different artwork; the flag only decides whether this one shows it at all.
  *
- * The Lottie/SVG illustrations in /public/lottie are NOT wired in. Two things killed them:
+ * The rest of the Lottie/SVG set in /public/lottie is still NOT wired in. Two things killed
+ * them:
  *
  *   1. Style. They are flat cartoon vector art, and next to Cormorant hairlines and gold
  *      rules the cartoon wins — visual hierarchy is ruthless, and the cheapest element on
@@ -57,12 +65,17 @@ interface Skin {
  * it is not. Pick artwork that already sits with the palette; do not repaint artwork to fit
  * it.
  *
- * The files stay on disk for when real photography or a commissioned set arrives.
+ * That is also why `inCarousel` is opt-in: the nikah illustration is pastel, and it only
+ * holds together on the CREAM slides. On `bg-deep-green` — kids, valentines — it reads as
+ * pasted on. Before setting the flag, look at the artwork against that slide's surface.
  */
 
 const SKINS: Record<string, Skin> = {
   nikah: {
-    surface: "bg-cream",
+    // Light green, the only on-brand way: hala-green faded over the cream body composites
+    // to a soft sage. Kept at /10 — the code's own warning is that saffron over green past
+    // ~15% turns the field to olive; a light tint stays clean and lets the gold candies read.
+    surface: "bg-hala-green/10",
     ink: "text-cocoa-ink",
     muted: "text-cocoa-ink/55",
     rule: "border-cocoa-ink/15",
@@ -71,6 +84,9 @@ const SKINS: Record<string, Skin> = {
     glowVar: "--brand-saffron",
     washVar: "--brand-green",
     ornamentTone: "text-saffron",
+    // The one slide that asks for candies flowing. Gold bonbons on light green is the
+    // brand's core pairing, so this is where the field earns being turned up.
+    ornamentEmphasis: 1.7,
   },
   kids: {
     surface: "bg-hala-green",
@@ -121,6 +137,9 @@ export function ProductShowcase() {
 
   const item = FLAGSHIP[index]!;
   const skin = SKINS[item.id]!;
+  // `inCarousel`, not just `art`: an occasion's page artwork does NOT get the carousel by
+  // default. Half these slides are deep green — see the note on OccasionArt.
+  const art = item.art?.inCarousel ? item.art : undefined;
   const slideCustom: SlideCustom = { direction, isRtl };
 
   return (
@@ -156,7 +175,11 @@ export function ProductShowcase() {
       </AnimatePresence>
 
       {/* Candies, lollipops, stars. Line art, drifting and twinkling. */}
-      <HeroOrnaments tone={skin.ornamentTone} animate={animate} />
+      <HeroOrnaments
+        tone={skin.ornamentTone}
+        animate={animate}
+        emphasis={skin.ornamentEmphasis ?? 1}
+      />
 
 
       {/* Two columns, not one stack.
@@ -174,9 +197,10 @@ export function ProductShowcase() {
             exit="exit"
             className="mx-auto grid w-full max-w-6xl items-center gap-8 md:grid-cols-2 md:gap-16"
           >
-            {/* The gift box, drawn in a gold hairline. One mark for every occasion — the
-                artwork is the SAME on all four, and only the tone changes. That is the
-                point: a coherent brand beats four illustrations from four artists. */}
+            {/* The artwork. `HERO_ART` wins where it has an entry; every other slide falls
+                back to the gift box drawn in a gold hairline, where only the tone changes.
+                A coherent mark beats four illustrations from four artists — so the drawn
+                box remains the default, not the exception. */}
             <motion.div
               variants={slideVariants}
               custom={slideCustom}
@@ -189,12 +213,26 @@ export function ProductShowcase() {
                 animate={animate ? "float" : "still"}
                 className="relative size-full"
               >
-                <GiftBoxMark
-                  key={item.id}
-                  tone={skin.accent}
-                  animate={animate}
-                  className="size-full"
-                />
+                {art ? (
+                  // Hero, and the LCP element on first paint — hence `priority`. It is
+                  // product imagery, so it does NOT mirror under `dir="rtl"`.
+                  <OptimizedImage
+                    key={item.id}
+                    src={art.src}
+                    alt={art.alt}
+                    fill
+                    priority
+                    sizes="(min-width: 1024px) 384px, (min-width: 768px) 320px, (min-width: 640px) 256px, 192px"
+                    className="object-contain"
+                  />
+                ) : (
+                  <GiftBoxMark
+                    key={item.id}
+                    tone={skin.accent}
+                    animate={animate}
+                    className="size-full"
+                  />
+                )}
               </motion.div>
             </motion.div>
 
