@@ -17,7 +17,7 @@
  * each page genuinely about its own occasion. Do not reduce them to a template.
  */
 
-import { BASE_PATH } from "@/lib/site";
+import { BASE_PATH } from "./site.ts";
 
 /**
  * Supplied hero artwork for an occasion. Absent on most of them — see `art` below.
